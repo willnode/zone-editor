@@ -1,4 +1,5 @@
-body, html {
+body,
+html {
   margin: 0;
   height: 100%;
   font-family: sans-serif;
@@ -37,4 +38,11 @@ body, html {
 
 .editor {
   flex: 1;
+  background-color: #1e1e1e;
+}
+
+#result-editor>.loading {
+  padding: 2em;
+  text-align: center;
+  color: lightgray;
 }

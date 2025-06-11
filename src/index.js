@@ -24,9 +24,6 @@ export function editNS(content, changes) {
     }).filter(x => !!x);
 
     var changecount = 0;
-    if (!Array.isArray(changeList)) {
-        changeList = [changeList];
-    }
     const zone = content.soa.name;
 
     for (let mod of changeList) {

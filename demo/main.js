@@ -1,7 +1,4 @@
 
-import './monaco.js';
-
-import { editor } from 'monaco-editor';
 import yaml from 'js-yaml';
 import { editNS, generateNS, parseNS } from '../src';
 
@@ -9,7 +6,10 @@ let inputEditor, changesEditor, resultEditor, diffCheckbox, diffBefore, diffAfte
 
 const theme = 'vs-dark';
 
-function setupEditors() {
+/**
+ * @param {import('monaco-editor').editor} editor 
+ */
+function setupEditors(editor) {
     inputEditor = editor.create(document.getElementById('input-editor'), {
         value: `$TTL 86400  ; Default TTL (1 day)
 @   IN  SOA ns1.example.com. admin.example.com. (
@@ -89,6 +89,7 @@ internal    IN  A       10.0.0.10
     });
 
     const resultEditorHtml = document.getElementById('result-editor');
+    resultEditorHtml.innerHTML = '';
     resultEditor = editor.create(resultEditorHtml, {
         value: '',
         language: 'ini',
@@ -97,8 +98,8 @@ internal    IN  A       10.0.0.10
         automaticLayout: true,
     });
 
-    [inputEditor, changesEditor].forEach(editor => {
-        editor.onDidChangeModelContent(updateResult);
+    [inputEditor, changesEditor].forEach(e => {
+        e.onDidChangeModelContent(updateResult);
     });
 
     diffCheckbox = document.getElementById('diffcheckbox');
@@ -164,4 +165,8 @@ function updateResult() {
     }
 }
 
-setupEditors();
+(async function (params) {
+    await import('./monaco.js');
+    const { editor } = await import('monaco-editor');
+    setupEditors(editor);
+})()
