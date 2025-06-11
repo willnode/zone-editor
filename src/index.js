@@ -49,10 +49,18 @@ export function editNS(content, changes) {
     return changecount;
 }
 
+/** 
+ * @param {string} content
+ * @returns {import("dns-zonefile").DNSZone}
+*/
 export function parseNS(content) {
     return parse(content);
 }
 
-export function generateNS(content) {
-    return generate(content);
+/** 
+ * @param {string} content
+ * @returns {import("dns-zonefile").DNSZone}
+*/
+export function generateNS(content, template = null) {
+    return generate(content, template);
 }

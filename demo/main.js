@@ -2,7 +2,7 @@
 import yaml from 'js-yaml';
 import { editNS, generateNS, parseNS } from '../src';
 
-let inputEditor, changesEditor, resultEditor, diffCheckbox, diffBefore, diffAfter;
+let inputEditor, changesEditor, resultEditor, changesLabel, diffCheckbox, diffBefore, diffAfter;
 
 const theme = 'vs-dark';
 
@@ -98,6 +98,8 @@ internal    IN  A       10.0.0.10
         automaticLayout: true,
     });
 
+    changesLabel = document.getElementById('changes-label');
+
     [inputEditor, changesEditor].forEach(e => {
         e.onDidChangeModelContent(updateResult);
     });
@@ -150,9 +152,10 @@ function updateResult() {
         const input = parseNS(inputEditor.getValue());
         const changes = yaml.load(changesEditor.getValue());
         const useDiff = diffCheckbox.checked;
-        const before = generateNS(input);
-        editNS(input, changes);
-        const after = generateNS(input);
+        const before = generateNS(input, template);
+        changesLabel.innerText = editNS(input, changes) + " changes";
+        if (changesLabel.innerText == "1 changes") changesLabel.innerText = "1 change";
+        const after = generateNS(input, template);
         if (useDiff) {
             diffBefore.setValue(before);
             diffAfter.setValue(after);
@@ -170,3 +173,52 @@ function updateResult() {
     const { editor } = await import('monaco-editor');
     setupEditors(editor);
 })()
+
+const template = `; Zone: {zone}
+
+{$origin}
+{$ttl}
+
+; SOA Record
+{name} {ttl}	IN	SOA	{mname}{rname}(
+{serial} ;serial
+{refresh} ;refresh
+{retry} ;retry
+{expire} ;expire
+{minimum} ;minimum ttl
+)
+
+; NS Records
+{ns}
+
+; MX Records
+{mx}
+
+; A Records
+{a}
+
+; AAAA Records
+{aaaa}
+
+; CNAME Records
+{cname}
+
+; PTR Records
+{ptr}
+
+; TXT Records
+{txt}
+
+; SRV Records
+{srv}
+
+; SPF Records
+{spf}
+
+; CAA Records
+{caa}
+
+; DS Records
+{ds}
+
+`
