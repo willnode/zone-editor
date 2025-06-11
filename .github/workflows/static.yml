@@ -32,7 +32,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build web
-        run: npm run build -- --base '/zone-editor/'
+        run: |
+          npm install
+          npm run build -- --base '/zone-editor/'
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
