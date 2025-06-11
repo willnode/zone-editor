@@ -1,0 +1,22 @@
+{
+  "name": "named-parser",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "dev": "cd demo && vite",
+    "build": "cd demo && vite build",
+    "preview": "cd demo && vite preview"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dns-zonefile": "^0.3.2"
+  },
+  "devDependencies": {
+    "js-yaml": "^4.1.0",
+    "monaco-editor": "^0.45.0",
+    "vite": "^5.0.0"
+  }
+}
