@@ -165,7 +165,7 @@ function updateResult() {
     }
 }
 
-(async function (params) {
+(async function () {
     await import('./monaco.js');
     const { editor } = await import('monaco-editor');
     setupEditors(editor);

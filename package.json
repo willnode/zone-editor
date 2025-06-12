@@ -1,5 +1,5 @@
 {
-  "name": "named-parser",
+  "name": "@willnode/zone-editor",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -8,8 +8,8 @@
     "preview": "cd demo && vite preview"
   },
   "type": "module",
-  "author": "",
-  "license": "ISC",
+  "author": "Wildan M",
+  "license": "MIT",
   "description": "",
   "dependencies": {
     "dns-zonefile": "^0.3.2"
