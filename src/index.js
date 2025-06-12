@@ -2,13 +2,19 @@ import dns from "dns-zonefile";
 import { appendIfNotExist, deleteIfExist, getArrayOf, mapKey, splitByQuotes, splitLimit, turnNsToAbsolute } from "./utils";
 const { generate, parse } = dns;
 
+/**
+ * @import {DNSZone} from 'dns-zonefile'
+ * @typedef {string | {action: 'add'|'del', type: string, domain: string, value: string|null}} DNSChange
+ */
+
 /** 
- * @param {import("dns-zonefile").DNSZone} content mutable
- * @param {string[]} changes
+ * @param {DNSZone} content mutable
+ * @param {DNSChange[]} changes
  * @returns {Number}
 */
 export function editNS(content, changes) {
-    const changeList = changes.filter(x => typeof x === 'string').map(value => {
+    const changeList = changes.map(value => {
+        if (typeof value !== 'string') return value;
         if (!/^(add|del) /i.test(value)) {
             value = `add ${value}`;
         }
@@ -21,7 +27,7 @@ export function editNS(content, changes) {
                 value: values[3] || null,
             };
         }
-    }).filter(x => !!x);
+    }).filter(x => x && typeof x === 'object');
 
     var changecount = 0;
     const zone = content.soa.name;
@@ -48,15 +54,16 @@ export function editNS(content, changes) {
 
 /** 
  * @param {string} content
- * @returns {import("dns-zonefile").DNSZone}
+ * @returns {DNSZone}
 */
 export function parseNS(content) {
     return parse(content);
 }
 
 /** 
- * @param {string} content
- * @returns {import("dns-zonefile").DNSZone}
+ * @param {DNSZone} content
+ * @param {string|null} template
+ * @returns {string}
 */
 export function generateNS(content, template = null) {
     return generate(content, template);

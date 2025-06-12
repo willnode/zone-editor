@@ -1,7 +1,7 @@
 {
   "name": "@domcloud/zone-editor",
   "description": "edit BIND9 zone file using list of text changes",
-  "version": "0.9.0",
+  "version": "0.9.1",
   "main": "index.js",
   "scripts": {
     "dev": "cd demo && vite",
