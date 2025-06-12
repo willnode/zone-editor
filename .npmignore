@@ -1,3 +1,4 @@
-node_modules
 .vscode
+.github
+node_modules
 demo
