@@ -38,14 +38,15 @@ export function isNsMatch(object, attrs, zone) {
     if (object == null) return !_keys.length;
     for (var i = 0; i < _keys.length; i++) {
         var key = _keys[i];
-        if (!(key in object)) {
+        if (attrs[key] === null) {
+            continue;
+        } else if (!(key in object)) {
             return false;
         } else if (["name", "host", "alias"].includes(key)) {
             // must compare in absolute
             if (turnNsToAbsolute(attrs[key], zone) !== turnNsToAbsolute(object[key], zone)) {
                 return false;
             }
-            // TODO: TXT
         } else {
             if (attrs[key] !== object[key]) return false;
         }
@@ -54,99 +55,115 @@ export function isNsMatch(object, attrs, zone) {
 }
 
 export const turnNsToAbsolute = (drec, zone) => {
-    // must be absolute
-    if (!drec.endsWith('.')) {
-        if (drec.endsWith('@')) {
-            drec = drec.substring(0, drec.length - 1);
+    if (zone === "@") {
+        // keep this to relative
+        if (/\.@$/.test(drec)) {
+            return drec.substring(0, drec.length - 2);
+        } else {
+            return drec;
         }
-        drec += zone;
+    } else {
+
+        if (/\.$/.test(drec)) {
+            return drec;
+        } else if (/@$/.test(drec)) {
+            return drec.substring(0, drec.length - 1) + zone;
+        } else {
+            return drec + "." + zone;
+        }
     }
-    return drec;
 }
 
 export const deleteIfExist = (/** @type {string} */ zone, /** @type {any[]} */ arr, /** @type {any} */ record) => {
-    const idx = arr.findIndex((x) => isNsMatch(x, record, zone));
-    if (idx === -1) {
-        return false;
-    } else {
-        arr.splice(idx, 1);
-        return true;
+    let idx, changecount;
+    while ((idx = arr.findIndex((x) => isNsMatch(x, record, zone))) != -1) {
+         arr.splice(idx, 1);
     }
+    return changecount;
 }
 export const appendIfNotExist = (/** @type {string} */ zone,  /** @type {any[]} */ arr, /** @type {{}} */ record) => {
     const idx = arr.findIndex((x) => isNsMatch(x, record, zone));
     if (idx === -1) {
         arr.push(record);
-        return true;
+        return 1;
     } else {
-        return false;
+        return 0;
     }
 }
-
-const arrayKey = {
-    A: 'a',
-    AAAA: 'aaaa',
-    NS: 'ns',
-    CNAME: 'cname',
-    MX: 'mx',
-    PTR: 'ptr',
-    TXT: 'txt',
-    SRV: 'srv',
-    SPF: 'spf',
-    CAA: 'caa',
-};
 
 export const mapKey = {
     'a': ( /** @type {string} */ name, /** @type {string} */ ip) => ({
         name,
-        ip
+        ip: ip || null,
     }),
     'aaaa': ( /** @type {string} */ name, /** @type {string} */ ip) => ({
         name,
-        ip
+        ip: ip || null,
     }),
     'ns': ( /** @type {string} */ name, /** @type {string} */ host) => ({
         name,
-        host
+        host: host || null,
     }),
     'cname': ( /** @type {string} */ name, /** @type {string} */ alias) => ({
         name,
-        alias
+        alias: alias || null,
     }),
     'mx': ( /** @type {string} */ name, /** @type {string} */ preference, /** @type {string} */ host) => ({
         name,
-        preference: parseInt(preference, 10),
-        host,
+        preference: preference == null ? null : parseInt(preference, 10),
+        host: host || null,
     }),
     'ptr': ( /** @type {string} */ name, /** @type {string} */ host) => ({
         name,
-        host
+        host: host || null,
     }),
     'txt': ( /** @type {string} */ name, /** @type {string[]} */ ...txt) => ({
         name,
-        txt: txt.join(' '),
+        txt: txt.length == 0 || txt[0] === null ? null : joinByQuotes(txt),
     }),
     'srv': ( /** @type {string} */ name, /** @type {string} */ priority, /** @type {string} */ weight, /** @type {string} */ port, /** @type {string} */ target) => ({
         name,
-        priority: parseInt(priority, 10),
-        weight: parseInt(weight, 10),
-        port: parseInt(port, 10),
+        priority: priority == null ? null : parseInt(priority, 10),
+        weight: weight == null ? null : parseInt(weight, 10),
+        port: port == null ? null : parseInt(port, 10),
         target,
     }),
     'spf': ( /** @type {string} */ name, /** @type {string} */ s) => ({
         name,
-        data: s
+        data: s || null,
     }),
     'caa': ( /** @type {string} */ name, /** @type {string} */ flags, /** @type {string} */ tag, /** @type {string} */ value) => ({
         name,
-        flags: parseInt(flags, 10),
-        tag,
-        value: value.replace(new RegExp('^"(.+?)"$'), "$1"),
+        flags: flags == null ? null : parseInt(flags, 10),
+        tag: tag || null,
+        value: value || null,
     }),
 }
 
-export const getArrayOf = ( /** @type {any} */ file, /** @type {keyof typeof arrayKey | String} */ type) => {
-    if (!arrayKey[type])
+export const getArrayOf = ( /** @type {any} */ file, /** @type {keyof typeof mapKey | String} */ type) => {
+    if (!mapKey[type])
         throw new Error('Unknown type ' + type);
-    return file[arrayKey[type]] || (file[arrayKey[type]] = []);
+    if (!file[type])
+        file[type] = [];
+    return file[type];
+}
+
+export const splitByQuotes = (input) => {
+    if (input === null) {
+        return [null];
+    }
+
+    const regex = /(?:[^\s"]+|"(?:\\.|[^"\\])*")+/g;
+    const matches = input.match(regex) || [];
+
+    return [...matches];
+}
+
+export function joinByQuotes(arr) {
+    return arr.map(str => {
+        if (/^".+"$/.test(str)) {
+            return str;
+        }
+        return `"${str.replace(/"/g, '\\"')}"`;
+    }).join(' ');
 }

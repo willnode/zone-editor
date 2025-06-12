@@ -1,5 +1,5 @@
 import dns from "dns-zonefile";
-import { appendIfNotExist, deleteIfExist, getArrayOf, mapKey, splitLimit, turnNsToAbsolute } from "./utils";
+import { appendIfNotExist, deleteIfExist, getArrayOf, mapKey, splitByQuotes, splitLimit, turnNsToAbsolute } from "./utils";
 const { generate, parse } = dns;
 
 /** 
@@ -28,18 +28,15 @@ export function editNS(content, changes) {
 
     for (let mod of changeList) {
         var action = mod.action.toLowerCase();
-        var arr = getArrayOf(content, mod.type.toUpperCase());
+        var type = mod.type.toLowerCase();
+        var arr = getArrayOf(content, type);
         var domain = turnNsToAbsolute((mod.domain || '').toLowerCase(), zone);
-        var map = mapKey[mod.type.toLowerCase()](domain, ...("" + mod.value).split(' '));
+        var map = mapKey[type](domain, ...splitByQuotes(mod.value));
         if (action === 'add') {
-            if (appendIfNotExist(zone, arr, map)) {
-                changecount++;
-            }
+            changecount += appendIfNotExist(zone, arr, map);
         }
         if (action === 'del') {
-            if (deleteIfExist(zone, arr, map)) {
-                changecount++;
-            }
+            changecount += deleteIfExist(zone, arr, map);
         }
     }
     if (changecount === 0) {

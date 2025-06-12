@@ -2,7 +2,7 @@
 import yaml from 'js-yaml';
 import { editNS, generateNS, parseNS } from '../src';
 
-let inputEditor, changesEditor, resultEditor, changesLabel, diffCheckbox, diffBefore, diffAfter;
+let inputEditor, changesEditor, resultEditor, resultEditorHtml, changesLabel, diffCheckbox, diffBefore, diffAfter;
 
 const theme = 'vs-dark';
 
@@ -88,15 +88,8 @@ internal    IN  A       10.0.0.10
         automaticLayout: true,
     });
 
-    const resultEditorHtml = document.getElementById('result-editor');
+    resultEditorHtml = document.getElementById('result-editor');
     resultEditorHtml.innerHTML = '';
-    resultEditor = editor.create(resultEditorHtml, {
-        value: '',
-        language: 'ini',
-        theme,
-        readOnly: true,
-        automaticLayout: true,
-    });
 
     changesLabel = document.getElementById('changes-label');
 
@@ -105,10 +98,16 @@ internal    IN  A       10.0.0.10
     });
 
     diffCheckbox = document.getElementById('diffcheckbox');
-    diffCheckbox.addEventListener('change', updateResult);
-    diffCheckbox.addEventListener('change', (e) => {
-        const v = e.currentTarget.checked;
-        resultEditor.dispose();
+    diffCheckbox.checked = true;
+    diffCheckbox.addEventListener('change', updateDiffEditor(editor));
+
+    updateDiffEditor(editor)();
+}
+
+function updateDiffEditor(editor) {
+    return () => {
+        const v = diffCheckbox.checked;
+        resultEditor && resultEditor.dispose();
         resultEditor = v ? editor.createDiffEditor(
             resultEditorHtml,
             {
@@ -142,9 +141,7 @@ internal    IN  A       10.0.0.10
         }
 
         updateResult();
-    });
-
-    updateResult();
+    };
 }
 
 function updateResult() {
