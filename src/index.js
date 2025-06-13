@@ -1,5 +1,5 @@
 import dns from "dns-zonefile";
-import { appendIfNotExist, deleteIfExist, getArrayOf, mapKey, splitByQuotes, splitLimit, turnNsToAbsolute } from "./utils";
+import { appendIfNotExist, deleteIfExist, getArrayOf, mapKey, splitByQuotes, splitLimit, turnNsToAbsolute } from "./utils.js";
 const { generate, parse } = dns;
 
 /**
