@@ -63,7 +63,6 @@ export const turnNsToAbsolute = (drec, zone) => {
             return drec;
         }
     } else {
-
         if (/\.$/.test(drec)) {
             return drec;
         } else if (/@$/.test(drec)) {
@@ -75,9 +74,10 @@ export const turnNsToAbsolute = (drec, zone) => {
 }
 
 export const deleteIfExist = (/** @type {string} */ zone, /** @type {any[]} */ arr, /** @type {any} */ record) => {
-    let idx, changecount;
+    let idx, changecount = 0;
     while ((idx = arr.findIndex((x) => isNsMatch(x, record, zone))) != -1) {
-         arr.splice(idx, 1);
+        arr.splice(idx, 1);
+        changecount++;
     }
     return changecount;
 }

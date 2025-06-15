@@ -10,9 +10,11 @@ const { generate, parse } = dns;
 /** 
  * @param {DNSZone} content mutable
  * @param {DNSChange[]} changes
+ * @param {{ zone?: string }} options optional options, zone = "example.com"
  * @returns {Number}
 */
-export function editNS(content, changes) {
+export function editNS(content, changes, options = null) {
+    let { zone } = options || {};
     const changeList = changes.map(value => {
         if (typeof value !== 'string') return value;
         if (!/^(add|del) /i.test(value)) {
@@ -30,13 +32,17 @@ export function editNS(content, changes) {
     }).filter(x => x && typeof x === 'object');
 
     var changecount = 0;
-    const zone = content.soa.name;
+    // soaname dictate if we should write this in relative/absolute path,
+    // the optional 'zone' options helps matching if soaname is '@'
+    const soaname = content.soa.name;
+    zone = !zone ? soaname : (zone.endsWith('.') ? zone : (zone + '.'));
+    zone = zone.toLowerCase();
 
     for (let mod of changeList) {
         var action = mod.action.toLowerCase();
         var type = mod.type.toLowerCase();
         var arr = getArrayOf(content, type);
-        var domain = turnNsToAbsolute((mod.domain || '').toLowerCase(), zone);
+        var domain = turnNsToAbsolute((mod.domain || '').toLowerCase(), soaname);
         var map = mapKey[type](domain, ...splitByQuotes(mod.value));
         if (action === 'add') {
             changecount += appendIfNotExist(zone, arr, map);

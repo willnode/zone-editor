@@ -146,11 +146,13 @@ function updateDiffEditor(editor) {
 
 function updateResult() {
     try {
-        const input = parseNS(inputEditor.getValue());
+        const inputStr = inputEditor.getValue() + '';
+        const input = parseNS(inputStr);
         const changes = yaml.load(changesEditor.getValue());
         const useDiff = diffCheckbox.checked;
         const before = generateNS(input, template);
-        changesLabel.innerText = editNS(input, changes) + " changes";
+        const zone = inputStr.match(/^; Zone: +(.+)$/)?.[1];
+        changesLabel.innerText = editNS(input, changes, { zone }) + " changes";
         if (changesLabel.innerText == "1 changes") changesLabel.innerText = "1 change";
         const after = generateNS(input, template);
         if (useDiff) {
