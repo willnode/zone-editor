@@ -149,7 +149,7 @@ export const getArrayOf = ( /** @type {any} */ file, /** @type {keyof typeof map
 }
 
 export const splitByQuotes = (input) => {
-    if (input === null) {
+    if (input == null) {
         return [null];
     }
 
